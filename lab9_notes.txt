@@ -1,0 +1,111 @@
+CS-402L DATA SCIENCE LAB — WEEK 09
+Lab 9: Linear and Polynomial Regression, Cross-Validation, and Ridge Grid Search
+
+Dataset files included:
+- real_estate.csv
+- yacht_hydrodynamics.data
+- concrete_strength.csv
+
+Run the scripts from this Lab_9 folder after installing:
+python -m pip install pandas numpy matplotlib scikit-learn
+
+TASK 1 — ESTIMATE HOUSING PRICES NEAR TRANSIT
+Dataset: UCI Real Estate Valuation (414 transactions).
+Feature: distance to nearest MRT station divided by 100 (distance_100m).
+Target: house price of unit area, in units of 10,000 New Taiwan dollars per ping.
+
+(a) Linear regression:
+Slope = -0.7262 price units per 100 m
+Intercept = 45.8514 price units
+
+(b) At 500 m, distance_100m = 5:
+Predicted price = 42.2204 price units.
+
+(c) Interpretation:
+The slope is negative. For every additional 100 m from the nearest MRT station,
+the fitted price decreases by about 0.726 price units per ping,
+equivalent to about 7,262 New Taiwan dollars per ping.
+This describes the fitted association in this dataset, not proof that distance
+alone causes the price difference. The scatter plot and fitted line are saved as
+task1_housing.png.
+
+TASK 2 — COMPARE MODELS FOR YACHT RESISTANCE
+Dataset: UCI Yacht Hydrodynamics (308 experiments).
+Feature: sixth column (index 5), Froude number.
+Target: seventh column (index 6), residuary resistance per unit displacement weight.
+Validation: same shuffled five folds, random_state=42, scoring=negative RMSE.
+
+Linear fold RMSEs: [8.16, 10.57, 9.84, 8.38, 7.78]
+Linear mean CV RMSE: 8.95
+
+Quadratic fold RMSEs: [3.93, 4.59, 4.45, 4.49, 3.5]
+Quadratic mean CV RMSE: 4.19
+
+Decision: The quadratic model is better because its mean RMSE (4.19)
+is lower than the linear model's (8.95). Lower RMSE means smaller
+prediction errors. As noted in the lab handout, a row-based split can place
+experiments from the same hull in different folds.
+
+TASK 3 — TUNE A CONCRETE STRENGTH MODEL
+Dataset: UCI Concrete Compressive Strength. Exact duplicate rows were removed.
+Rows after duplicate removal: 1005
+Training rows: 804
+Test rows: 201
+
+(a) Linear baseline mean five-fold CV RMSE: 10.20 MPa
+Fold RMSEs: [10.1, 10.18, 10.05, 10.18, 10.49]
+
+(b) Top three settings ranked by GridSearchCV (mean CV RMSE):
+Rank 1: degree=3, alpha=0.1, mean CV RMSE=6.09 MPa\nRank 2: degree=3, alpha=0.01, mean CV RMSE=6.16 MPa\nRank 3: degree=3, alpha=1, mean CV RMSE=6.27 MPa\n
+Best parameters: {'poly__degree': 3, 'ridge__alpha': 0.1}
+Best mean CV RMSE: 6.09 MPa
+
+(c) Held-out test performance of the refitted winner:
+Test RMSE: 6.52 MPa
+Test MAE: 4.67 MPa
+Actual-versus-predicted plot saved as task3_concrete.png.
+
+(d) Comparison and explanation:
+The tuned model's mean CV RMSE (6.09 MPa) is lower than
+the linear baseline (10.20 MPa), indicating improved
+cross-validation prediction accuracy. One degree-2 interaction feature is
+Cement × Water. PolynomialFeatures creates interaction terms between input
+ingredients. StandardScaler is inside the pipeline so scaling is fitted
+separately on each training fold during cross-validation; this avoids leaking
+validation-fold information into preprocessing. Scaling also puts features on
+comparable scales before Ridge penalizes coefficient magnitudes.
+
+GITHUB COMMANDS — RUN IN GIT BASH
+First create an EMPTY GitHub repository named Lab_9. Copy its HTTPS URL and
+replace REPOSITORY_URL below. These commands assume you are starting in the
+parent folder where Semester_7 should be created.
+
+mkdir -p Semester_7/Data_Science_Lab/Lab_9
+cd Semester_7/Data_Science_Lab/Lab_9
+
+Copy all three .py scripts, both .png plots, lab9_notes.txt, and the three
+dataset files into this folder before running the commits below.
+
+git init
+git branch -M main
+git remote add origin REPOSITORY_URL
+
+Commit 1 — Task 1 and the supplied datasets:
+git add task1_housing.py task1_housing.png real_estate.csv yacht_hydrodynamics.data concrete_strength.csv
+git commit -m "Add Task 1 housing price model"
+
+Commit 2 — Task 2:
+git add task2_yacht.py
+git commit -m "Add Task 2 yacht resistance model"
+
+Commit 3 — Task 3 and lab notes:
+git add task3_concrete.py task3_concrete.png lab9_notes.txt
+git commit -m "Add Task 3 concrete strength model and lab notes"
+
+Push and verify:
+git push -u origin main
+git log --oneline
+
+Finally, open the GitHub repository and copy its URL for submission. Take a
+screenshot showing the three commits in the repository history. The GitHub
+repository must be created by you; the scripts do not create the remote repo.
